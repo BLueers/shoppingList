@@ -2,15 +2,18 @@ package de.blueers.shoppingList.activities;
 
 import java.util.ArrayList;
 
+import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -21,8 +24,9 @@ import de.blueers.shoppingList.adapters.ListsAdapter;
 public class ItemsActivity extends Activity {
 	ListView itemlist;
 	ListsAdapter listAdapter;
-	
-    public void onCreate(Bundle savedInstanceState) {
+ 
+	@SuppressLint("NewApi")
+	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_items);
         itemlist= (ListView)findViewById(R.id.list_view_items);
@@ -46,6 +50,14 @@ public class ItemsActivity extends Activity {
         		
         	}
         }); 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            ActionBar mActionBar = getActionBar();
+            mActionBar.setTitle("Items");
+            mActionBar.setDisplayHomeAsUpEnabled(true);
+	    } else {
+	            setTitle("Items");
+	    }
+
     }
 
     @Override
@@ -60,7 +72,11 @@ public class ItemsActivity extends Activity {
     			.show();
     	
     	switch (item.getItemId()) {
-            case R.id.menu_item_add:
+	        case android.R.id.home:
+	            Intent mIntent = new Intent(this, HomeActivity.class);
+	            startActivity(mIntent);
+	            return true;
+        	case R.id.menu_item_add:
             	showAddItemDialog();
                 return true;
             case R.id.menu_item_refresh:
