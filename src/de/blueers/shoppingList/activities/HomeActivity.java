@@ -25,9 +25,9 @@ public class HomeActivity extends Activity {
        // String[] items={"Hallo1","Hallo2","Hallo3","Hallo4"};
         ArrayList<String> items;
         items= new ArrayList<String>();
-        items.add("hallo0");
-        items.add("hallo1");
-        items.add("hallo2");
+        items.add("Netto");
+        items.add("Plus");
+        items.add("Herbert");
         ListsAdapter adapter = new ListsAdapter(this,items);
         shoppingLists.setAdapter(adapter); 
         adapter.add("ende");

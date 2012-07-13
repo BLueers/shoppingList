@@ -7,7 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.TextView;
+import android.widget.TextView; 
 import de.blueers.shoppingList.R;
 
 public class ItemsAdapter extends ArrayAdapter<String> {
