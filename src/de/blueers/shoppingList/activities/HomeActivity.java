@@ -2,20 +2,22 @@ package de.blueers.shoppingList.activities;
 
 import java.util.ArrayList;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+
 import de.blueers.shoppingList.R;
 import de.blueers.shoppingList.adapters.ListsAdapter;
 
-public class HomeActivity extends Activity {
+
+public class HomeActivity extends SherlockActivity {
 	ListView shoppingLists;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -30,7 +32,7 @@ public class HomeActivity extends Activity {
         items.add("Herbert");
         ListsAdapter adapter = new ListsAdapter(this,items);
         shoppingLists.setAdapter(adapter); 
-        adapter.add("ende");
+        adapter.add("ende"); 
         shoppingLists.setOnItemClickListener(new OnItemClickListener() {
         	@Override
         	public void onItemClick(AdapterView<?> parent, View view,
@@ -50,8 +52,9 @@ public class HomeActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_home, menu);
-        
-        return true;
+ 	   com.actionbarsherlock.view.MenuInflater inflater = getSupportMenuInflater();
+ 	   inflater.inflate(R.menu.activity_home, (com.actionbarsherlock.view.Menu) menu);
+ 	   return super.onCreateOptionsMenu(menu);
+
     }
 }
