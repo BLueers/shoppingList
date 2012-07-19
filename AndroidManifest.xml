@@ -20,7 +20,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="de.blueers.shoppingList.activities.ItemsActivity"/>
+        <activity android:name=".activities.ItemsActivity"/>
     </application>
 
 </manifest>
