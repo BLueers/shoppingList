@@ -13,12 +13,10 @@ import de.blueers.shoppingList.models.ShoppingList;
 
 public class ListsAdapter extends ArrayAdapter<ShoppingList> {
 	private final Context context;
-	private final ArrayList<ShoppingList>  values;
 
 	public ListsAdapter(Context context, ArrayList<ShoppingList> values) {
 		super(context, R.layout.listitem_list, values);
 		this.context = context;
-		this.values = values;
 	}
 
 
@@ -33,7 +31,7 @@ public class ListsAdapter extends ArrayAdapter<ShoppingList> {
 		}
 		TextView tvListName = (TextView) rowView.findViewById(R.id.list_item_list_name);
 		TextView tvNumberOfItems = (TextView) rowView.findViewById(R.id.list_item_number_of_items);
-		tvListName.setText(values.get(position).getName());  
+		tvListName.setText(this.getItem(position).getName());  
 		tvNumberOfItems.setText("0");
 		return rowView;
 	}

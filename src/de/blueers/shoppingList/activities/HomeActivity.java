@@ -1,6 +1,7 @@
 package de.blueers.shoppingList.activities;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -8,14 +9,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
@@ -29,10 +28,10 @@ import de.blueers.shoppingList.persistence.ShoppingListsDataSource;
 
 public class HomeActivity extends SherlockActivity {
 	ListView shoppingLists;
-	ListsAdapter listAdapter;
+	ListsAdapter listsAdapter;
 	ShoppingListsDataSource dataSource;
     private static final String TAG = "HomeActivity";
-    AsyncUpdateList asyncUpdateList;
+    
     ProgressDialog progresBar;
 	
     public void onCreate(Bundle savedInstanceState) {
@@ -41,21 +40,18 @@ public class HomeActivity extends SherlockActivity {
         shoppingLists= (ListView)findViewById(R.id.list_view_shopping_lists);
         dataSource = new ShoppingListsDataSource(this);
         dataSource.open();
-        ArrayList<ShoppingList> items = dataSource.getAllLists();
-        listAdapter = new ListsAdapter(this,items);
-        shoppingLists.setAdapter(listAdapter); 
+        listsAdapter = new ListsAdapter(this, dataSource.getAllLists());
+        shoppingLists.setAdapter(listsAdapter); 
         shoppingLists.setOnItemClickListener(new OnItemClickListener() {
         	@Override
         	public void onItemClick(AdapterView<?> parent, View view,
         		int position, long id) {
         		Intent intent = new Intent(view.getContext(), ItemsActivity.class);
-        		intent.putExtra("list_id", listAdapter.getItem(position).getId());
-        		intent.putExtra("list_name", listAdapter.getItem(position).getName());
+        		intent.putExtra("list_id", listsAdapter.getItem(position).getId());
+        		intent.putExtra("list_name", listsAdapter.getItem(position).getName());
          	    startActivity(intent);
-        		
         	}
-        }); 
-       // new AsyncUpdateList().execute();
+        });        
     }
     public void onPause(){
     	super.onPause();
@@ -63,8 +59,7 @@ public class HomeActivity extends SherlockActivity {
     }
     public void onStop() {
     	super.onStop();
-    	//dataSource.close();
-    	
+     	
     }
     public void onRestart(){
     	super.onRestart();
@@ -90,17 +85,7 @@ public class HomeActivity extends SherlockActivity {
 
             	return true;
             case R.id.menu_item_settings:
-            	progresBar = new ProgressDialog(this);
-                progresBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                progresBar.setMessage("Loading...");
-                progresBar.setCancelable(false);
-                progresBar.setProgress(0);
-                progresBar.setMax(3);
-                progresBar.show();
-             	Log.d(TAG, "Setting los");
-            	asyncUpdateList=new AsyncUpdateList(this);
-            	asyncUpdateList.execute();
-                return true;
+                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -133,44 +118,8 @@ public class HomeActivity extends SherlockActivity {
     private void addItem(String listName){
     	//ShoppingList sl = new ShoppingList(listName);
     	ShoppingList sl = dataSource.createList(listName);
-    	this.listAdapter.add(sl);
+    	this.listsAdapter.add(sl);
+
     	
     }
-    private class AsyncUpdateList extends AsyncTask<Void, Void, Void> {
-    	HomeActivity homeActivity;
-    	
-    	AsyncUpdateList(HomeActivity homeActivity){
-    		this.homeActivity= homeActivity;
-    	}
-    	
-    	protected Void doInBackground(Void... params){
-         	Log.d(TAG, "start");
-        	try {
-				Thread.sleep(1000);
-				homeActivity.progresBar.setProgress(1);
-				Thread.sleep(1000);
-				homeActivity.progresBar.setProgress(2);
-				Thread.sleep(1000);
-				homeActivity.progresBar.setProgress(3);
-				
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-         	Log.d(TAG, "fertig");
-        	return null;
-        }
-
-        protected void onProgressUpdate(Void... progress) {
-           // setProgressPercent(progress[0]);
-        	Log.d(TAG, "progress");
-        }
-
-        protected void onPostExecute(Void result) {
-        	Log.d(TAG, "end Task");
-        	homeActivity.progresBar.dismiss();
-        	homeActivity.showAddItemDialog();
-         }
-    }
-
 }
