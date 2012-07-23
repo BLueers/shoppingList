@@ -7,31 +7,36 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TabHost;
 
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.ActionBar.Tab;
+import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 
 import de.blueers.shoppingList.R;
 import de.blueers.shoppingList.adapters.ItemsAdapter;
 import de.blueers.shoppingList.adapters.ListsAdapter;
-import de.blueers.shoppingList.misc.MyTabContentFactory;
+import de.blueers.shoppingList.fragments.ItemsFragment;
 import de.blueers.shoppingList.models.ShoppingItem;
 import de.blueers.shoppingList.models.ShoppingList;
 import de.blueers.shoppingList.persistence.ShoppingItemsDataSource;
 import de.blueers.shoppingList.persistence.ShoppingListsDataSource;
 
 
-public class HomeActivity extends SherlockActivity {
+public class HomeActivity extends SherlockFragmentActivity{
 	ListView shoppingLists;
 	ListsAdapter listsAdapter;
 	ShoppingListsDataSource listsDataSource;
 	ShoppingItemsDataSource itemsDataSource;
-	private HashMap<String, Long> tabs;
+	private long mActiveListId;
+	private ItemsFragment mActiveItemsFragment;
 
     TabHost mTabHost;
 
@@ -42,33 +47,32 @@ public class HomeActivity extends SherlockActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_tab);
+    	Log.d(TAG, "construktor ");
 
         listsDataSource = new ShoppingListsDataSource(this);
         listsDataSource.open();
         itemsDataSource = new ShoppingItemsDataSource(this);
         itemsDataSource.open();
         ArrayList<ShoppingList> lists= listsDataSource.getAllLists();
+    	Log.d(TAG, "add Tab ");
         
-        tabs = new HashMap<String, Long>();
-        for(ShoppingList l : lists){
-        	tabs.put(l.getName(), l.getId());
-        }
+        ActionBar actionBar =  getSupportActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        actionBar.setDisplayShowTitleEnabled(false);
         
-        MyTabContentFactory tabContentfactory = new MyTabContentFactory(this,tabs, itemsDataSource);
-        mTabHost = (TabHost)findViewById(android.R.id.tabhost);
-        mTabHost.setup();
-
-        
-        int i = 0;
+        int i=1;
         for(ShoppingList list:lists){
-            TabHost.TabSpec listTab = mTabHost.newTabSpec(list.getName());
-            listTab.setIndicator(list.getName());
-            listTab.setContent(tabContentfactory);
-            mTabHost.addTab(listTab);
+        	Log.d(TAG, "add Tab " + i);
+            Tab tab = actionBar.newTab()
+                    .setText(list.getName())
+                    .setTabListener(new TabListener<ItemsFragment>(
+                            this, list.getName(), list.getId()));
+          Log.d(TAG, "add it ");
+          actionBar.addTab(tab);
             i++;
-            if(i>=4){break;}
+            if(i>=8){break;}
         }
-        mTabHost.setCurrentTab(0);       
+    	Log.d(TAG, "Tabs added" + i);
     }
     public void onPause(){
     	super.onPause();
@@ -136,21 +140,61 @@ public class HomeActivity extends SherlockActivity {
     	
     }
     private void addItem(String itemName){
-    	long listId = tabs.get(mTabHost.getCurrentTabTag());
-    	Log.d(TAG, "Add " + itemName);
-    	ShoppingItem item = itemsDataSource.createItem(itemName, listId);
-    	ListView itemlist;
+    	
+    	ShoppingItem item = itemsDataSource.createItem(itemName, mActiveListId);
        	Log.d(TAG, "created " + itemName);
-           	
-    	itemlist= (ListView)mTabHost.getCurrentView().findViewById(R.id.list_view_items);
-     	Log.d(TAG, "itemlist " + itemlist.toString());
-     	ItemsAdapter ia = ((ItemsAdapter)itemlist.getAdapter());
-     	Log.d(TAG, "ia " + ia.toString());
-    	ia.add(item);
+          	
+       	mActiveItemsFragment.addItem(item);
    	
     }
 
+    public class TabListener<T extends SherlockFragment> implements com.actionbarsherlock.app.ActionBar.TabListener {
+        private ItemsFragment itemsFragment;
+        private final SherlockFragmentActivity mActivity;
+        private final String mTag;
+        private final long mlistId;
+       
+        public TabListener(SherlockFragmentActivity activity, String tag, long listId) {
+            mActivity = activity;
+            mTag = tag;
+            mlistId = listId;
+        }
 
+        /* The following are each of the ActionBar.TabListener callbacks */
+
+        public void onTabSelected(Tab tab, FragmentTransaction fragmentTransaction) {
+            // Check if the fragment is already initialized
+     		
+        	Log.d(TAG, "selected " + mTag );
+         	if (itemsFragment == null) {
+         		
+            	Log.d(TAG, "selected " + mTag );
+         		
+                ArrayList<ShoppingItem> items = itemsDataSource.getAllItems(mlistId);
+                ItemsAdapter itemsAdapter= new ItemsAdapter(mActivity,items);
+
+                itemsFragment = new ItemsFragment(itemsAdapter, mlistId);
+                
+                fragmentTransaction.add(android.R.id.content, itemsFragment, mTag);
+            } else {
+                // If it exists, simply attach it in order to show it
+            	fragmentTransaction.attach(itemsFragment);
+            }
+            mActiveItemsFragment = itemsFragment;
+            mActiveListId= mlistId;
+        }
+
+        public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+            if (itemsFragment != null) {
+                // Detach the fragment, because another one is being attached
+                ft.detach(itemsFragment);
+            }
+        }
+
+        public void onTabReselected(Tab tab, FragmentTransaction ft) {
+            // User selected the already selected tab. Usually do nothing.
+        }
+    }
 
     
 }
