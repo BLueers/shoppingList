@@ -57,8 +57,10 @@ public class ShoppingItemsDataSource {
 	public ArrayList<ShoppingItem> getAllItems(long listId) { 
 		ArrayList<ShoppingItem> shoppingItems = new ArrayList<ShoppingItem>();
 
-		Cursor cursor = database.query(MySQLiteHelper.TABLE_SHOPPING_ITEM,
-				allColumns,MySQLiteHelper.COLUMN_LIST_REFERENCE+ " = " + listId , null, null, null, null);
+		Cursor cursor = database.query(MySQLiteHelper.TABLE_SHOPPING_ITEM
+				, allColumns
+				, MySQLiteHelper.COLUMN_LIST_REFERENCE+ " = " + listId 
+				, null, null, null, null);
 
 		cursor.moveToFirst();
 		while (!cursor.isAfterLast()) {

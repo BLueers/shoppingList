@@ -1,73 +1,86 @@
 package de.blueers.shoppingList.activities;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
+import android.widget.TabHost;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 
 import de.blueers.shoppingList.R;
+import de.blueers.shoppingList.adapters.ItemsAdapter;
 import de.blueers.shoppingList.adapters.ListsAdapter;
+import de.blueers.shoppingList.misc.MyTabContentFactory;
+import de.blueers.shoppingList.models.ShoppingItem;
 import de.blueers.shoppingList.models.ShoppingList;
+import de.blueers.shoppingList.persistence.ShoppingItemsDataSource;
 import de.blueers.shoppingList.persistence.ShoppingListsDataSource;
 
 
 public class HomeActivity extends SherlockActivity {
 	ListView shoppingLists;
 	ListsAdapter listsAdapter;
-	ShoppingListsDataSource dataSource;
-    private static final String TAG = "HomeActivity";
+	ShoppingListsDataSource listsDataSource;
+	ShoppingItemsDataSource itemsDataSource;
+	private HashMap<String, Long> tabs;
+
+    TabHost mTabHost;
+
+	private static final String TAG = "HomeActivity";
     
     ProgressDialog progresBar;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
-        shoppingLists= (ListView)findViewById(R.id.list_view_shopping_lists);
-        dataSource = new ShoppingListsDataSource(this);
-        dataSource.open();
-        listsAdapter = new ListsAdapter(this, dataSource.getAllLists());
-        shoppingLists.setAdapter(listsAdapter); 
-        shoppingLists.setOnItemClickListener(new OnItemClickListener() {
-        	@Override
-        	public void onItemClick(AdapterView<?> parent, View view,
-        		int position, long id) {
-        		Intent intent = new Intent(view.getContext(), ItemsActivity.class);
-        		intent.putExtra("list_id", listsAdapter.getItem(position).getId());
-        		intent.putExtra("list_name", listsAdapter.getItem(position).getName());
-         	    startActivity(intent);
-        	}
-        });        
+        setContentView(R.layout.activity_list_tab);
+
+        listsDataSource = new ShoppingListsDataSource(this);
+        listsDataSource.open();
+        itemsDataSource = new ShoppingItemsDataSource(this);
+        itemsDataSource.open();
+        ArrayList<ShoppingList> lists= listsDataSource.getAllLists();
+        
+        tabs = new HashMap<String, Long>();
+        for(ShoppingList l : lists){
+        	tabs.put(l.getName(), l.getId());
+        }
+        
+        MyTabContentFactory tabContentfactory = new MyTabContentFactory(this,tabs, itemsDataSource);
+        mTabHost = (TabHost)findViewById(android.R.id.tabhost);
+        mTabHost.setup();
+
+        
+        int i = 0;
+        for(ShoppingList list:lists){
+            TabHost.TabSpec listTab = mTabHost.newTabSpec(list.getName());
+            listTab.setIndicator(list.getName());
+            listTab.setContent(tabContentfactory);
+            mTabHost.addTab(listTab);
+            i++;
+            if(i>=4){break;}
+        }
+        mTabHost.setCurrentTab(0);       
     }
     public void onPause(){
-   		Toast.makeText(getApplicationContext(),
-    			"onPause", Toast.LENGTH_SHORT)
-    			.show();
     	super.onPause();
-    	dataSource.close();
+    	itemsDataSource.close();
     }
     public void onStop() {
-  		Toast.makeText(getApplicationContext(),
-    			"onStop", Toast.LENGTH_SHORT)
-    			.show();
     	super.onStop();
      	
     }
     public void onRestart(){
     	super.onRestart();
-    	dataSource.open();
+    	itemsDataSource.open();
     }
 
     @Override
@@ -115,14 +128,29 @@ public class HomeActivity extends SherlockActivity {
 
         mAlertDialog.show();
     }
-    private void addItem(String listName){
+    private void addList(String listName){
     	//ShoppingList sl = new ShoppingList(listName);
-    	ShoppingList sl = dataSource.createList(listName);
+    	ShoppingList sl = listsDataSource.createList(listName);
     	this.listsAdapter.add(sl);
 
     	
     }
-    
+    private void addItem(String itemName){
+    	long listId = tabs.get(mTabHost.getCurrentTabTag());
+    	Log.d(TAG, "Add " + itemName);
+    	ShoppingItem item = itemsDataSource.createItem(itemName, listId);
+    	ListView itemlist;
+       	Log.d(TAG, "created " + itemName);
+           	
+    	itemlist= (ListView)mTabHost.getCurrentView().findViewById(R.id.list_view_items);
+     	Log.d(TAG, "itemlist " + itemlist.toString());
+     	ItemsAdapter ia = ((ItemsAdapter)itemlist.getAdapter());
+     	Log.d(TAG, "ia " + ia.toString());
+    	ia.add(item);
+   	
+    }
+
+
 
     
 }

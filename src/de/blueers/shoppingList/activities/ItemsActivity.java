@@ -99,30 +99,7 @@ public class ItemsActivity extends SherlockFragmentActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
-//    private void showAddItemDialog() {
-//        AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(this);
-//
-//        mAlertDialog.setTitle("Add item");
-//        mAlertDialog.setMessage("Input name");
-//
-//        final EditText mInput = new EditText(this);
-//        mInput.setText("");
-//        mAlertDialog.setView(mInput);
-//
-//        mAlertDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-//                public void onClick(DialogInterface dialog, int whichButton) {
-//                        String itemName = mInput.getText().toString();
-//                        addItem(itemName);
-//                }
-//        });
-//
-//        mAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-//                public void onClick(DialogInterface dialog, int whichButton) {
-//                }
-//        });
-//
-//        mAlertDialog.show();
-//    }
+
     private void showAddItemFragment(){
     	if (itemAddFragment == null){
     		itemAddFragment = new ItemAddFragment(
