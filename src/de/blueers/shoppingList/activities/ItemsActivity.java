@@ -3,63 +3,74 @@ package de.blueers.shoppingList.activities;
 import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.Toast;
+import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 
 import de.blueers.shoppingList.R;
 import de.blueers.shoppingList.adapters.ItemsAdapter;
+import de.blueers.shoppingList.fragments.ItemAddFragment;
+import de.blueers.shoppingList.fragments.ItemsFragment;
+import de.blueers.shoppingList.misc.ItemsChangeListener;
 import de.blueers.shoppingList.models.ShoppingItem;
 import de.blueers.shoppingList.persistence.ShoppingItemsDataSource;
 
 
 
-public class ItemsActivity extends SherlockActivity {
-	ListView itemlist;
-	ItemsAdapter listAdapter;
-	ShoppingItemsDataSource dataSource;
+public class ItemsActivity extends SherlockFragmentActivity {
 	String listName;
 	long listId;
- 
+	ShoppingItemsDataSource dataSource;
+	ItemsFragment itemsFragment;
+	ItemAddFragment itemAddFragment;
+	
+	private static final String TAG = "ItemsActivity";
+     
 	@SuppressLint("NewApi")
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_items);
+        
+        listName = getIntent().getExtras().getString("list_name");
+        listId = getIntent().getExtras().getLong("list_id",0);
         dataSource = new ShoppingItemsDataSource(this);
         dataSource.open();
 
-        listName = getIntent().getExtras().getString("list_name");
-        listId = getIntent().getExtras().getLong("list_id",0);
-        ArrayList<ShoppingItem> items = dataSource.getAllItems(listId);
-               
-        itemlist= (ListView)findViewById(R.id.list_view_items);
+        ActionBar mActionBar = getSupportActionBar();
+        mActionBar.setTitle(listName);
+        mActionBar.setDisplayHomeAsUpEnabled(true);
+        Log.d(TAG, "start Activity");
 
-        listAdapter = new ItemsAdapter(this,items);
-        itemlist.setAdapter(listAdapter); 
-        itemlist.setOnItemClickListener(new OnItemClickListener() {
-        	@Override
-        	public void onItemClick(AdapterView<?> parent, View view,
-        		int position, long id) {
-        		Toast.makeText(getApplicationContext(),
-        			"Click ListItem Number " + position, Toast.LENGTH_LONG)
-        			.show();
-        	} 
-        }); 
-            ActionBar mActionBar = getSupportActionBar();
-            mActionBar.setTitle(listName);
-            mActionBar.setDisplayHomeAsUpEnabled(true);
+        setContentView(R.layout.activity_items);
+        
+        // Check that the activity is using the layout version with
+        // the fragment_container FrameLayout
+
+        if (findViewById(R.id.fragment_container) != null) {
+            // However, if we're being restored from a previous state,
+            // then we don't need to do anything and should return or else
+            // we could end up with overlapping fragments.
+            if (savedInstanceState != null) {
+                return;
+            }
+
+            ArrayList<ShoppingItem> items = dataSource.getAllItems(listId);
+            ItemsAdapter itemsAdapter= new ItemsAdapter(this,items);
+
+            // Create an instance of ExampleFragment
+            itemsFragment = new ItemsFragment(itemsAdapter, listId);
+            Log.d(TAG, "create Fragment");
+            
+            // Add the fragment to the 'fragment_container' FrameLayout
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_container, itemsFragment).commit();
+        }
     }
 
     @Override
@@ -75,7 +86,7 @@ public class ItemsActivity extends SherlockActivity {
 	            startActivity(mIntent);
 	            return true;
         	case R.id.menu_item_add:
-            	showAddItemDialog();
+        		showAddItemFragment();
                 return true;
             case R.id.menu_item_refresh:
         		for (int i= 0; i<=300; i++){
@@ -88,35 +99,54 @@ public class ItemsActivity extends SherlockActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
-    private void showAddItemDialog() {
-        AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(this);
+//    private void showAddItemDialog() {
+//        AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(this);
+//
+//        mAlertDialog.setTitle("Add item");
+//        mAlertDialog.setMessage("Input name");
+//
+//        final EditText mInput = new EditText(this);
+//        mInput.setText("");
+//        mAlertDialog.setView(mInput);
+//
+//        mAlertDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+//                public void onClick(DialogInterface dialog, int whichButton) {
+//                        String itemName = mInput.getText().toString();
+//                        addItem(itemName);
+//                }
+//        });
+//
+//        mAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//                public void onClick(DialogInterface dialog, int whichButton) {
+//                }
+//        });
+//
+//        mAlertDialog.show();
+//    }
+    private void showAddItemFragment(){
+    	if (itemAddFragment == null){
+    		itemAddFragment = new ItemAddFragment(
+    				new ItemsChangeListener() {
+    					public void onItemAdded(String itemName) {
+    						addItem(itemName);
+                         }
+                });
+    	}
+    	FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
-        mAlertDialog.setTitle("Add item");
-        mAlertDialog.setMessage("Input name");
+    	// Replace whatever is in the fragment_container view with this fragment,
+    	// and add the transaction to the back stack so the user can navigate back
+    	transaction.replace(R.id.fragment_container, itemAddFragment);
+    	transaction.addToBackStack(null);
 
-        final EditText mInput = new EditText(this);
-        mInput.setText("");
-        mAlertDialog.setView(mInput);
-
-        mAlertDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                        String itemName = mInput.getText().toString();
-                        addItem(itemName);
-                }
-        });
-
-        mAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                }
-        });
-
-        mAlertDialog.show();
+    	// Commit the transaction
+    	transaction.commit();
+    	
+	
     }
     private void addItem(String itemName){
-
     	ShoppingItem item = dataSource.createItem(itemName, listId);
-    	this.listAdapter.add(item);
-    	
+    	itemsFragment.addItem(item);   	
     }
 
 }

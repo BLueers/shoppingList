@@ -1,8 +1,5 @@
 package de.blueers.shoppingList.activities;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -15,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
@@ -54,10 +52,16 @@ public class HomeActivity extends SherlockActivity {
         });        
     }
     public void onPause(){
+   		Toast.makeText(getApplicationContext(),
+    			"onPause", Toast.LENGTH_SHORT)
+    			.show();
     	super.onPause();
     	dataSource.close();
     }
     public void onStop() {
+  		Toast.makeText(getApplicationContext(),
+    			"onStop", Toast.LENGTH_SHORT)
+    			.show();
     	super.onStop();
      	
     }
@@ -79,10 +83,6 @@ public class HomeActivity extends SherlockActivity {
             	showAddItemDialog();
                 return true;
             case R.id.menu_item_refresh:
-        		for (int i= 0; i<=300; i++){
-        			addItem("generiert " + i);
-        		}
-
             	return true;
             case R.id.menu_item_settings:
                  return true;
@@ -122,4 +122,7 @@ public class HomeActivity extends SherlockActivity {
 
     	
     }
+    
+
+    
 }
