@@ -1,7 +1,6 @@
 package de.blueers.shoppingList.activities;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -11,10 +10,10 @@ import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TabHost;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
+import com.actionbarsherlock.app.SherlockDialogFragment;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
@@ -23,6 +22,7 @@ import com.actionbarsherlock.view.MenuItem;
 import de.blueers.shoppingList.R;
 import de.blueers.shoppingList.adapters.ItemsAdapter;
 import de.blueers.shoppingList.adapters.ListsAdapter;
+import de.blueers.shoppingList.fragments.EditListsDialogFragment;
 import de.blueers.shoppingList.fragments.ItemsFragment;
 import de.blueers.shoppingList.models.ShoppingItem;
 import de.blueers.shoppingList.models.ShoppingList;
@@ -37,8 +37,6 @@ public class HomeActivity extends SherlockFragmentActivity{
 	ShoppingItemsDataSource itemsDataSource;
 	private long mActiveListId;
 	private ItemsFragment mActiveItemsFragment;
-
-    TabHost mTabHost;
 
 	private static final String TAG = "HomeActivity";
     
@@ -100,12 +98,26 @@ public class HomeActivity extends SherlockFragmentActivity{
             	showAddItemDialog();
                 return true;
             case R.id.menu_item_refresh:
-            	return true;
+          	return true;
+            case R.id.menu_item_edit_lists:
+            	showEditListDialog();
+          	return true;
             case R.id.menu_item_settings:
                  return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+    private void showEditListDialog(){
+ 		Log.d(TAG, "edit Lists selected");
+        ArrayList<ShoppingList> lists = listsDataSource.getAllLists();
+ 		Log.d(TAG, "Listarray initialized");
+        ListsAdapter listsAdapter= new ListsAdapter(this,lists);
+        SherlockDialogFragment newFragment = new EditListsDialogFragment(listsAdapter);
+ 		Log.d(TAG, "Fragment instanciated");
+        newFragment.show(getSupportFragmentManager(), "dialog");
+        
+
     }
     private void showAddItemDialog() {
     	

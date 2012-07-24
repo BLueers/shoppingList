@@ -17,13 +17,13 @@ import de.blueers.shoppingList.models.ShoppingItem;
 
 public class ItemsFragment extends SherlockFragment {
 	ListView itemlist;
-	ItemsAdapter listAdapter;
+	ItemsAdapter mItemsAdapter;
 	long listId;
 	private static final String TAG = "ItemsFragment";
 	
-	public ItemsFragment(ItemsAdapter listAdapter, long listId){
+	public ItemsFragment(ItemsAdapter itemsAdapter, long listId){
 		super();
-		this.listAdapter = listAdapter;
+		this.mItemsAdapter = itemsAdapter;
 		this.listId = listId;
 		
 	}
@@ -33,7 +33,7 @@ public class ItemsFragment extends SherlockFragment {
         // Inflate the layout for this fragment
 		View fragmentView = inflater.inflate(R.layout.fragment_items, container, false);
         itemlist= (ListView)fragmentView.findViewById(R.id.list_view_items);
-        itemlist.setAdapter(listAdapter); 
+        itemlist.setAdapter(mItemsAdapter); 
         itemlist.setOnItemClickListener(new OnItemClickListener() {
         	@Override
         	public void onItemClick(AdapterView<?> parent, View view,
@@ -47,7 +47,7 @@ public class ItemsFragment extends SherlockFragment {
     }
     public void addItem(ShoppingItem item){
 
-    	this.listAdapter.add(item);
+    	this.mItemsAdapter.add(item);
     	
     }
 
