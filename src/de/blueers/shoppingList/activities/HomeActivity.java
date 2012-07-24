@@ -3,18 +3,16 @@ package de.blueers.shoppingList.activities;
 import java.util.ArrayList;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.widget.EditText;
-import android.widget.ListView;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.app.SherlockDialogFragment;
-import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -26,46 +24,38 @@ import de.blueers.shoppingList.fragments.EditListsDialogFragment;
 import de.blueers.shoppingList.fragments.ItemsFragment;
 import de.blueers.shoppingList.models.ShoppingItem;
 import de.blueers.shoppingList.models.ShoppingList;
-import de.blueers.shoppingList.persistence.ShoppingItemsDataSource;
-import de.blueers.shoppingList.persistence.ShoppingListsDataSource;
+import de.blueers.shoppingList.persistence.MyDataSource;
+
 
 
 public class HomeActivity extends SherlockFragmentActivity{
-	ListView shoppingLists;
-	ListsAdapter listsAdapter;
-	ShoppingListsDataSource listsDataSource;
-	ShoppingItemsDataSource itemsDataSource;
+
+	private MyDataSource mDataSource;
 	private long mActiveListId;
 	private ItemsFragment mActiveItemsFragment;
-
 	private static final String TAG = "HomeActivity";
     
-    ProgressDialog progresBar;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list_tab);
-    	Log.d(TAG, "construktor ");
+        setContentView(R.layout.activity_home);
 
-        listsDataSource = new ShoppingListsDataSource(this);
-        listsDataSource.open();
-        itemsDataSource = new ShoppingItemsDataSource(this);
-        itemsDataSource.open();
-        ArrayList<ShoppingList> lists= listsDataSource.getAllLists();
-    	Log.d(TAG, "add Tab ");
-        
+        mDataSource = new MyDataSource(this);
+        mDataSource.open();
+
         ActionBar actionBar =  getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         actionBar.setDisplayShowTitleEnabled(false);
         
+
+        ArrayList<ShoppingList> lists= mDataSource.getAllLists();
+
         int i=1;
         for(ShoppingList list:lists){
-        	Log.d(TAG, "add Tab " + i);
             Tab tab = actionBar.newTab()
                     .setText(list.getName())
-                    .setTabListener(new TabListener<ItemsFragment>(
+                    .setTabListener(new TabListener(
                             this, list.getName(), list.getId()));
-          Log.d(TAG, "add it ");
           actionBar.addTab(tab);
             i++;
             if(i>=8){break;}
@@ -74,7 +64,7 @@ public class HomeActivity extends SherlockFragmentActivity{
     }
     public void onPause(){
     	super.onPause();
-    	itemsDataSource.close();
+    	mDataSource.close();
     }
     public void onStop() {
     	super.onStop();
@@ -82,7 +72,7 @@ public class HomeActivity extends SherlockFragmentActivity{
     }
     public void onRestart(){
     	super.onRestart();
-    	itemsDataSource.open();
+    	mDataSource.open();
     }
 
     @Override
@@ -110,7 +100,7 @@ public class HomeActivity extends SherlockFragmentActivity{
     }
     private void showEditListDialog(){
  		Log.d(TAG, "edit Lists selected");
-        ArrayList<ShoppingList> lists = listsDataSource.getAllLists();
+        ArrayList<ShoppingList> lists = mDataSource.getAllLists();
  		Log.d(TAG, "Listarray initialized");
         ListsAdapter listsAdapter= new ListsAdapter(this,lists);
         SherlockDialogFragment newFragment = new EditListsDialogFragment(listsAdapter);
@@ -145,29 +135,25 @@ public class HomeActivity extends SherlockFragmentActivity{
         mAlertDialog.show();
     }
     private void addList(String listName){
-    	//ShoppingList sl = new ShoppingList(listName);
-    	ShoppingList sl = listsDataSource.createList(listName);
-    	this.listsAdapter.add(sl);
 
-    	
+    	ShoppingList sl = mDataSource.createList(listName);
+//    	this.listsAdapter.add(sl);
     }
     private void addItem(String itemName){
-    	
-    	ShoppingItem item = itemsDataSource.createItem(itemName, mActiveListId);
+    	ShoppingItem item = mDataSource.createItem(itemName, mActiveListId);
        	Log.d(TAG, "created " + itemName);
-          	
        	mActiveItemsFragment.addItem(item);
    	
     }
 
-    public class TabListener<T extends SherlockFragment> implements com.actionbarsherlock.app.ActionBar.TabListener {
+    private class TabListener implements com.actionbarsherlock.app.ActionBar.TabListener {
         private ItemsFragment itemsFragment;
-        private final SherlockFragmentActivity mActivity;
+        private final Context mContext;
         private final String mTag;
         private final long mlistId;
        
-        public TabListener(SherlockFragmentActivity activity, String tag, long listId) {
-            mActivity = activity;
+        public TabListener(Context context, String tag, long listId) {
+        	mContext = context;
             mTag = tag;
             mlistId = listId;
         }
@@ -182,8 +168,8 @@ public class HomeActivity extends SherlockFragmentActivity{
          		
             	Log.d(TAG, "selected " + mTag );
          		
-                ArrayList<ShoppingItem> items = itemsDataSource.getAllItems(mlistId);
-                ItemsAdapter itemsAdapter= new ItemsAdapter(mActivity,items);
+                ArrayList<ShoppingItem> items = mDataSource.getAllItems(mlistId);
+                ItemsAdapter itemsAdapter= new ItemsAdapter(mContext,items);
 
                 itemsFragment = new ItemsFragment(itemsAdapter, mlistId);
                 
