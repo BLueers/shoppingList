@@ -3,7 +3,6 @@ echo $yn
 echo
 git add -A
 git commit -m """$yn"""
-git push gh
 
 
 echo $yn
