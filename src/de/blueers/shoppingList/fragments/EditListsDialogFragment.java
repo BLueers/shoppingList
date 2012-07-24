@@ -5,23 +5,29 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockDialogFragment;
 
 import de.blueers.shoppingList.R;
+import de.blueers.shoppingList.adapters.ListsAdapter;
+import de.blueers.shoppingList.misc.EditListListener;
 
 public class EditListsDialogFragment extends SherlockDialogFragment {
 	
-	private ListAdapter mListAdapter;
+	private ListsAdapter mListsAdapter;
 	private ListView mlistView;
-	public EditListsDialogFragment(ListAdapter listAdapter){
+	private EditListListener mEditListListener;
+	public EditListsDialogFragment(ListsAdapter listsAdapter, EditListListener editListListener){
 		super();
-		mListAdapter = listAdapter;
+		mListsAdapter = listsAdapter;
+		mEditListListener= editListListener;
 		
 	}
     
@@ -30,16 +36,10 @@ public class EditListsDialogFragment extends SherlockDialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
     
-//    	View v = inflater.inflate(R.layout.fragment_add_item, container, false);
-//        View tv = v.findViewById(R.id.item_name);
-//        ((TextView)tv).setText("This is an instance of MyDialogFragment");
-//        return v;
-        
-
-        
+       
         View fragmentView = inflater.inflate(R.layout.fragment_edit_lists, container, false);
         mlistView= (ListView)fragmentView.findViewById(R.id.list_view_shopping_lists);
-        mlistView.setAdapter(mListAdapter); 
+        mlistView.setAdapter(mListsAdapter); 
         mlistView.setOnItemClickListener(new OnItemClickListener() {
         	@Override
         	public void onItemClick(AdapterView<?> parent, View view,
@@ -49,11 +49,42 @@ public class EditListsDialogFragment extends SherlockDialogFragment {
         			.show();
         	} 
         }); 
-        return fragmentView;
+        MyListener listener = new MyListener();
+        
+        CheckBox selectAllCheckBox = (CheckBox) fragmentView.findViewById( R.id.lists_check_all );
+    	selectAllCheckBox.setOnCheckedChangeListener(listener);
+    	Button deleteButton= (Button) fragmentView.findViewById( R.id.button_delete);
+    	deleteButton.setOnClickListener(listener);
 
+        return fragmentView;
         
-        
-        
+    }
+    private void deleteLists(){
+		Toast.makeText(getActivity().getApplicationContext(),
+    			"Delete ", Toast.LENGTH_LONG)
+    			.show();
+		
+		mEditListListener.transactionComplete(mListsAdapter.getSelectedLists());
+
+    }
+    private class MyListener implements View.OnClickListener, OnCheckedChangeListener{
+	    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+	    {
+	        if ( isChecked )
+	        {
+        		Toast.makeText(getActivity().getApplicationContext(),
+            			"Checked ", Toast.LENGTH_LONG)
+            			.show();
+	        }
+	        
+	    }
+	    public void onClick(View v)
+	    {
+        		Toast.makeText(getActivity().getApplicationContext(),
+            			"Delete ", Toast.LENGTH_LONG)
+            			.show();
+        		deleteLists();
+	    } 	
     }
 }
 

@@ -31,10 +31,10 @@ public class ItemsAdapter extends ArrayAdapter<ShoppingItem> {
 		else {
 			LayoutInflater inflater = (LayoutInflater) context
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			rowView = inflater.inflate(R.layout.listitem_list, parent, false);			
+			rowView = inflater.inflate(R.layout.listitem_item, parent, false);			
 		}
-		TextView tvItemName = (TextView) rowView.findViewById(R.id.list_item_list_name);
-		TextView tvNumberOfItems = (TextView) rowView.findViewById(R.id.list_item_number_of_items);
+		TextView tvItemName = (TextView) rowView.findViewById(R.id.list_item_item_name);
+		TextView tvNumberOfItems = (TextView) rowView.findViewById(R.id.list_item_amount);
 		tvItemName.setText(values.get(position).getName());  
 		tvNumberOfItems.setText("0");
 		return rowView;

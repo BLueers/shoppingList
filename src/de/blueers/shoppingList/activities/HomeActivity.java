@@ -12,7 +12,6 @@ import android.widget.EditText;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
-import com.actionbarsherlock.app.SherlockDialogFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -22,6 +21,7 @@ import de.blueers.shoppingList.adapters.ItemsAdapter;
 import de.blueers.shoppingList.adapters.ListsAdapter;
 import de.blueers.shoppingList.fragments.EditListsDialogFragment;
 import de.blueers.shoppingList.fragments.ItemsFragment;
+import de.blueers.shoppingList.misc.EditListListener;
 import de.blueers.shoppingList.models.ShoppingItem;
 import de.blueers.shoppingList.models.ShoppingList;
 import de.blueers.shoppingList.persistence.MyDataSource;
@@ -34,7 +34,7 @@ public class HomeActivity extends SherlockFragmentActivity{
 	private long mActiveListId;
 	private ItemsFragment mActiveItemsFragment;
 	private static final String TAG = "HomeActivity";
-    
+    private EditListsDialogFragment mEditListsDialogFragment;
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,7 +68,6 @@ public class HomeActivity extends SherlockFragmentActivity{
     }
     public void onStop() {
     	super.onStop();
-     	
     }
     public void onRestart(){
     	super.onRestart();
@@ -80,8 +79,8 @@ public class HomeActivity extends SherlockFragmentActivity{
  	   com.actionbarsherlock.view.MenuInflater inflater = getSupportMenuInflater();
  	   inflater.inflate(R.menu.activity_home, (com.actionbarsherlock.view.Menu) menu);
  	   return super.onCreateOptionsMenu(menu);
-
     }
+
     public boolean onOptionsItemSelected(MenuItem item) {
     	switch (item.getItemId()) {
         	case R.id.menu_item_add:
@@ -102,12 +101,20 @@ public class HomeActivity extends SherlockFragmentActivity{
  		Log.d(TAG, "edit Lists selected");
         ArrayList<ShoppingList> lists = mDataSource.getAllLists();
  		Log.d(TAG, "Listarray initialized");
+ 		
+ 		EditListListener listener = new EditListListener(){
+ 			public void transactionCancel(){
+ 				mEditListsDialogFragment.dismiss();
+ 			}
+ 			public void transactionComplete(ArrayList<ShoppingList> list){
+				mEditListsDialogFragment.dismiss();			
+ 			}
+ 		};
+ 		
         ListsAdapter listsAdapter= new ListsAdapter(this,lists);
-        SherlockDialogFragment newFragment = new EditListsDialogFragment(listsAdapter);
+        mEditListsDialogFragment = new EditListsDialogFragment(listsAdapter, listener);
  		Log.d(TAG, "Fragment instanciated");
-        newFragment.show(getSupportFragmentManager(), "dialog");
-        
-
+ 		mEditListsDialogFragment.show(getSupportFragmentManager(), "dialog");
     }
     private void showAddItemDialog() {
     	
