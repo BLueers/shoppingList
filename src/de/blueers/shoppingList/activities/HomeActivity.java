@@ -3,25 +3,22 @@ package de.blueers.shoppingList.activities;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnKeyListener;
-import android.widget.CompoundButton;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.SearchView;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.Tab;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.MenuItem.OnActionExpandListener;
 
 import de.blueers.shoppingList.R;
 import de.blueers.shoppingList.adapters.ItemsAdapter;
@@ -41,7 +38,9 @@ public class HomeActivity extends SherlockFragmentActivity {
 	private static final String TAG = "HomeActivity";
 	private EditListsDialogFragment mEditListsDialogFragment;
 	private HashMap<Long, Tab> mListIdToTab;
+    private Menu mMenu;
 
+	
 	public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
@@ -91,22 +90,36 @@ public class HomeActivity extends SherlockFragmentActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		
+		mMenu = menu;
 		com.actionbarsherlock.view.MenuInflater inflater = getSupportMenuInflater();
 		
 		inflater.inflate(R.menu.activity_home,
 				(com.actionbarsherlock.view.Menu) menu);
 		
-		EditText textEditAddItem = (EditText) menu.findItem(R.id.menu_action_item_add).getActionView();
-		textEditAddItem.setOnKeyListener(new actionItemListener());
+		MenuItem menuItemAdd=menu.findItem(R.id.menu_action_item_add);
+		menuItemAdd.setOnActionExpandListener(new ActionExpandListener());
+		
+		EditText editTextAdd = (EditText) menuItemAdd.getActionView();
+		editTextAdd.setOnKeyListener(new actionItemListener());
+		
 		
 		return super.onCreateOptionsMenu(menu);
 	}
 
+	private void addItemfromActionBar(){
+		EditText editTextAdd= (EditText)mMenu.findItem(R.id.menu_action_item_add).getActionView();
+		if(!editTextAdd.getText().toString().equals("")){
+			addItem(editTextAdd.getText().toString());     
+		}
+		editTextAdd.setText("");
+    	InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow( editTextAdd.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+    	mMenu.findItem(R.id.menu_action_item_add).collapseActionView();	
+	}
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-//		case R.id.menu_item_add:
-//			showAddItemDialog();
-//			return true;
+		case R.id.menu_button_item_add:
+        	addItemfromActionBar();
 		case R.id.menu_item_refresh:
 			return true;
 		case R.id.menu_item_edit_lists:
@@ -145,34 +158,6 @@ public class HomeActivity extends SherlockFragmentActivity {
 		mEditListsDialogFragment.show(getSupportFragmentManager(), "dialog");
 	}
 
-	private void showAddItemDialog() {
-
-		AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(this);
-
-		mAlertDialog.setTitle("Add shopping List");
-		mAlertDialog.setMessage("Input name");
-
-		final EditText mInput = new EditText(this);
-		mInput.setText("");
-		mAlertDialog.setView(mInput);
-
-		mAlertDialog.setPositiveButton("Ok",
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						String itemName = mInput.getText().toString();
-						addItem(itemName);
-					}
-				});
-
-		mAlertDialog.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-					}
-				});
-
-		mAlertDialog.show();
-	}
-
 	private ShoppingList addList(String listName) {
 
 		ShoppingList sl = mDataSource.createList(listName);
@@ -195,13 +180,32 @@ public class HomeActivity extends SherlockFragmentActivity {
 		mActiveItemsFragment.addItem(item);
 
 	}
+	private class ActionExpandListener implements OnActionExpandListener {
+        public boolean onMenuItemActionCollapse(MenuItem item) {
+        	mMenu.findItem(R.id.menu_button_item_add).setVisible(false);
+        	
+            return true; 
+        }
+        public boolean onMenuItemActionExpand(MenuItem item) {
+        	mMenu.findItem(R.id.menu_button_item_add).setVisible(true);
+
+        	final View editTextAdd= item.getActionView();     	
+        	       	
+        	editTextAdd.post(new Runnable() {
+                public void run() {
+                	editTextAdd.requestFocus();
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.showSoftInput(editTextAdd, InputMethodManager.SHOW_IMPLICIT);
+                }
+            });
+            return true;  
+        }
+    }
 	private class actionItemListener implements OnKeyListener{
 	    public boolean onKey(View v, int keyCode, KeyEvent event) {
 	        if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
 	            (keyCode == KeyEvent.KEYCODE_ENTER)) {
-	          // Perform action on key press
-	        	addItem(((EditText)v).getText().toString());       	
-	        	((EditText)v).setText("");
+	        	addItemfromActionBar();
 	        	return true;
 	        }
 	        return false;

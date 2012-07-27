@@ -3,4 +3,8 @@
     android:id="@+id/action_view_item_add"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:hint="item name" />
+    android:hint="item name"
+     > 
+<!--      <requestFocus /> -->
+</EditText>
+
