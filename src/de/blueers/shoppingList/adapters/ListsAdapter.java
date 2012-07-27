@@ -61,6 +61,8 @@ public class ListsAdapter extends ArrayAdapter<ShoppingList> {
             			"Checked " + mList.getName(), Toast.LENGTH_LONG)
             			.show();
         		mSelectedLists.add(mList);
+	        } else {
+	        	mSelectedLists.remove(mList);	     //remove iterates through the list, might be time consuming   	
 	        }
 	        
 	    }

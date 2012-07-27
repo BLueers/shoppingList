@@ -4,29 +4,30 @@
     android:layout_height="match_parent" 
     android:paddingTop="5dip">
 	
-    <EditText
-        android:id="@+id/edit_text_add_list"
-		android:hint="list name"
-		android:maxLines="1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:text = "list name"
-	/>
      <Button
         android:id="@+id/button_add"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/edit_text_add_list"
+        android:layout_alignParentRight="true"
         android:text = "add list"
 	/>
-    <CheckBox
-        android:id="@+id/lists_check_all"
-        android:layout_width="wrap_content"
-        android:layout_alignParentRight="true"
+    <EditText
+        android:id="@+id/edit_text_add_list"
+		android:hint="list name"
+		android:maxLines="1"
+		android:scrollHorizontally="true"
+		android:layout_toLeftOf="@id/button_add"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-	 />
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+	/>
+<!--     <CheckBox -->
+<!--         android:id="@+id/lists_check_all" -->
+<!--         android:layout_width="wrap_content" -->
+<!--         android:layout_alignParentRight="true" -->
+<!--         android:layout_height="wrap_content" -->
+<!-- 	 /> -->
      <Button
         android:id="@+id/button_delete"
         android:layout_width="wrap_content"

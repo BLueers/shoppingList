@@ -7,5 +7,6 @@ import de.blueers.shoppingList.models.ShoppingList;
 
 public interface EditListListener {
 	public void transactionCancel();
-	public void transactionComplete(ArrayList<ShoppingList> list);
+	public void transactionComplete(ArrayList<ShoppingList> lists);
+	public ShoppingList addList(String name);
 }

@@ -67,16 +67,12 @@ public class MyDataSource {
 	}
 
 	public void deleteItem(ShoppingItem shoppingItem) {
-		long id = shoppingItem.getId();
-		System.out.println("Comment deleted with id: " + id);
 		database.delete(MySQLiteHelper.TABLE_SHOPPING_ITEM, MySQLiteHelper.COLUMN_ID
-				+ " = " + id, null);
+				+ " = " + shoppingItem.getId(), null);
 	}
 	public void deleteList(ShoppingList shoppingList) {
-		long id = shoppingList.getId();
-		System.out.println("Comment deleted with id: " + id);
-		database.delete(MySQLiteHelper.COLUMN_LIST_NAME, MySQLiteHelper.COLUMN_ID
-				+ " = " + id, null);
+		database.delete(MySQLiteHelper.TABLE_SHOPPING_LISTS, MySQLiteHelper.COLUMN_ID
+				+ " = " +  shoppingList.getId(), null);
 	}
 
 
