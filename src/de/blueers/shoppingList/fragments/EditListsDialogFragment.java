@@ -1,18 +1,18 @@
 package de.blueers.shoppingList.fragments;
 
+import java.util.ArrayList;
+
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockDialogFragment;
 
@@ -24,7 +24,7 @@ import de.blueers.shoppingList.models.ShoppingList;
 public class EditListsDialogFragment extends SherlockDialogFragment {
 	
 	private ListsAdapter mListsAdapter;
-	private ListView mlistView;
+	private ListView mListView;
 	private EditListListener mEditListListener;
 	private static final String TAG = "EditListsDialogFragment";	
 	public EditListsDialogFragment(ListsAdapter listsAdapter, EditListListener editListListener){
@@ -41,15 +41,15 @@ public class EditListsDialogFragment extends SherlockDialogFragment {
     
         Log.d(TAG, "onCreate");
         View fragmentView = inflater.inflate(R.layout.fragment_edit_lists, container, false);
-        mlistView= (ListView)fragmentView.findViewById(R.id.list_view_shopping_lists);
-        mlistView.setAdapter(mListsAdapter); 
+        mListView= (ListView)fragmentView.findViewById(R.id.list_view_shopping_lists);
+        mListView.setAdapter(mListsAdapter); 
+        mListView.setItemsCanFocus(false);
+        mListView.setChoiceMode( ListView.CHOICE_MODE_MULTIPLE);
         
         Log.d(TAG, "onCreate2");
        
         MyListener listener = new MyListener();       
         
-//      CheckBox selectAllCheckBox = (CheckBox) fragmentView.findViewById( R.id.lists_check_all );
-//    	selectAllCheckBox.setOnCheckedChangeListener(listener);
     	Button deleteButton= (Button) fragmentView.findViewById( R.id.button_delete);
     	deleteButton.setOnClickListener(listener);
         Log.d(TAG, "onCreate3");
@@ -73,29 +73,22 @@ public class EditListsDialogFragment extends SherlockDialogFragment {
 
     }
     private void deleteLists(){
-		Toast.makeText(getActivity().getApplicationContext(),
-    			"Delete ", Toast.LENGTH_LONG)
-    			.show();
 		
-		mEditListListener.transactionComplete(mListsAdapter.getSelectedLists());
+   // 	long[] ids = mListView.getCheckedItemIds();
+    	ArrayList<ShoppingList> lists;
+    	SparseBooleanArray checkedItems;
+    	lists = new ArrayList<ShoppingList> ();
+    	checkedItems = mListView.getCheckedItemPositions();
+    	
+    	for (int i = 0; i <= checkedItems.size(); i++){
+    		if(checkedItems.get(i)){
+        		lists.add(mListsAdapter.getItem(i));
+    		}
+    	}
+		mEditListListener.transactionComplete(lists);
 
     }
-    private class MyListener implements View.OnClickListener, OnCheckedChangeListener, OnKeyListener{
-	    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-	    {
-	    	
-	    	//the List should be checkable to make this part easier, also the Adapter should take care of this
-//	    	int countLists = mListsAdapter.getCount();
-//	    	for (int i= 0; i< countLists; i++){
-//	    		mListsAdapter.getVie
-//	    		View v = (View) mlistView.getItemAtPosition(i);
-//	    		Log.d(TAG, "found position "+ i);
-//	    		CheckBox cb=(CheckBox) v.findViewById(R.id.list_item_check_box);
-//	    		Log.d(TAG, "found cb "+ i);
-//	    		cb.setChecked(isChecked);
-//	    		Log.d(TAG, "checked cb "+ i);
-//	    	}
-	    }
+    private class MyListener implements View.OnClickListener, OnKeyListener{
 	    public void onClick(View v)
 	    {
         	switch (v.getId()){

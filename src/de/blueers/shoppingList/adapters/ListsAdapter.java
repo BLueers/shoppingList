@@ -43,8 +43,15 @@ public class ListsAdapter extends ArrayAdapter<ShoppingList> {
 		tvNumberOfItems.setText("0");
 		selectedCheckBox.setOnCheckedChangeListener(new ListItemListener(this.getItem(position)));
 
+		
 		return rowView;
 	}
+	public boolean hasStableIds(){
+		return true;
+	}
+	public long getItemId(int position) {
+		   return getItem(position).getId();
+		}
 	public ArrayList<ShoppingList> getSelectedLists(){
 		return mSelectedLists;
 	}
@@ -57,9 +64,6 @@ public class ListsAdapter extends ArrayAdapter<ShoppingList> {
 	    {
 	        if ( isChecked )
 	        {
-        		Toast.makeText(context.getApplicationContext(),
-            			"Checked " + mList.getName(), Toast.LENGTH_LONG)
-            			.show();
         		mSelectedLists.add(mList);
 	        } else {
 	        	mSelectedLists.remove(mList);	     //remove iterates through the list, might be time consuming   	

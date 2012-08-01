@@ -11,6 +11,8 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnKeyListener;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -102,6 +104,14 @@ public class HomeActivity extends SherlockFragmentActivity {
 		EditText editTextAdd = (EditText) menuItemAdd.getActionView();
 		editTextAdd.setOnKeyListener(new actionItemListener());
 		
+		 String[] jdh = {"Hamburt", "Peter","zah"} ;
+	       ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, android.R.id.text1, jdh );
+	        AutoCompleteTextView textView = (AutoCompleteTextView) menuItemAdd.getActionView();
+	        textView.setAdapter(adapter);
+	        textView.setThreshold(0);
+	       textView.showDropDown();
+			
+
 		
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -189,13 +199,14 @@ public class HomeActivity extends SherlockFragmentActivity {
         public boolean onMenuItemActionExpand(MenuItem item) {
         	mMenu.findItem(R.id.menu_button_item_add).setVisible(true);
 
-        	final View editTextAdd= item.getActionView();     	
+        	final AutoCompleteTextView editTextAdd= (AutoCompleteTextView) item.getActionView();     	
         	       	
         	editTextAdd.post(new Runnable() {
                 public void run() {
                 	editTextAdd.requestFocus();
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.showSoftInput(editTextAdd, InputMethodManager.SHOW_IMPLICIT);
+                    editTextAdd.showDropDown();
                 }
             });
             return true;  

@@ -31,18 +31,25 @@ public class ItemsFragment extends SherlockFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, 
         Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+		
+		
+		
 		View fragmentView = inflater.inflate(R.layout.fragment_items, container, false);
         itemlist= (ListView)fragmentView.findViewById(R.id.list_view_items);
         itemlist.setAdapter(mItemsAdapter); 
-        itemlist.setOnItemClickListener(new OnItemClickListener() {
-        	@Override
-        	public void onItemClick(AdapterView<?> parent, View view,
-        		int position, long id) {
-        		Toast.makeText(getActivity().getApplicationContext(),
-        			"Click ListItem Number " + position, Toast.LENGTH_LONG)
-        			.show();
-        	} 
-        }); 
+        itemlist.setItemsCanFocus(false);
+        itemlist.setChoiceMode( ListView.CHOICE_MODE_MULTIPLE);
+
+        
+//        itemlist.setOnItemClickListener(new OnItemClickListener() {
+//        	@Override
+//        	public void onItemClick(AdapterView<?> parent, View view,
+//        		int position, long id) {
+//        		Toast.makeText(getActivity().getApplicationContext(),
+//        			"Click ListItem Number " + position, Toast.LENGTH_LONG)
+//        			.show();
+//        	} 
+//        }); 
         return fragmentView;
     }
     public void addItem(ShoppingItem item){
